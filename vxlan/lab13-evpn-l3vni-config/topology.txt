@@ -1,0 +1,25 @@
+# GNS3 cabling for this lab:  nodeA:ifA  <->  nodeB:ifB
+# eth0 on every VM goes to the GNS3 NAT cloud (management / apt) - not listed.
+spine1:eth1 leaf1:eth1   # underlay
+spine1:eth2 leaf2:eth1   # underlay
+spine1:eth3 leaf3:eth1   # underlay
+spine2:eth1 leaf1:eth2   # underlay
+spine2:eth2 leaf2:eth2   # underlay
+spine2:eth3 leaf3:eth2   # underlay
+h1:eth1 leaf1:eth3
+h2:eth1 leaf2:eth3
+h3:eth1 leaf3:eth3
+h4:eth1 leaf1:eth4
+h5:eth1 leaf3:eth4
+
+# nodes
+#   spine1   router
+#   spine2   router
+#   leaf1    router
+#   leaf2    router
+#   leaf3    router
+#   h1       host
+#   h2       host
+#   h3       host
+#   h4       host
+#   h5       host
