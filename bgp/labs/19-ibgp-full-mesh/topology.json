@@ -1,0 +1,184 @@
+{
+  "lab": "19-ibgp-full-mesh",
+  "title": "BGP - Why does iBGP require full mesh peering?",
+  "video": "https://www.youtube.com/watch?v=03Gl1YGeZYc",
+  "nodes": {
+    "R1": {
+      "kind": "router",
+      "asn": 100,
+      "x": -50,
+      "y": 0,
+      "adapters": 2,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.12.1/24"
+          ],
+          "description": "to R2"
+        },
+        "eth1": {
+          "addresses": [
+            "10.0.14.1/24"
+          ],
+          "description": "to R4"
+        }
+      },
+      "loopback": [
+        "1.1.1.1/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "R2": {
+      "kind": "router",
+      "asn": 100,
+      "x": 150,
+      "y": 0,
+      "adapters": 2,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.12.2/24"
+          ],
+          "description": "to R1"
+        },
+        "eth1": {
+          "addresses": [
+            "10.0.23.2/24"
+          ],
+          "description": "to R3"
+        }
+      },
+      "loopback": [
+        "2.2.2.2/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "R3": {
+      "kind": "router",
+      "asn": 100,
+      "x": 350,
+      "y": 0,
+      "adapters": 2,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.23.3/24"
+          ],
+          "description": "to R2"
+        },
+        "eth1": {
+          "addresses": [
+            "192.168.3.1/24"
+          ],
+          "description": "LAN to H3"
+        }
+      },
+      "loopback": [
+        "3.3.3.3/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "R4": {
+      "kind": "router",
+      "asn": 200,
+      "x": -250,
+      "y": 0,
+      "adapters": 2,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.14.4/24"
+          ],
+          "description": "to R1"
+        },
+        "eth1": {
+          "addresses": [
+            "192.168.4.1/24"
+          ],
+          "description": "LAN to H4"
+        }
+      },
+      "loopback": [
+        "4.4.4.4/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "H3": {
+      "kind": "host",
+      "asn": null,
+      "x": 550,
+      "y": 0,
+      "adapters": 1,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "192.168.3.10/24"
+          ],
+          "description": "to R3"
+        }
+      },
+      "loopback": [],
+      "dummies": {},
+      "gateway": "192.168.3.1"
+    },
+    "H4": {
+      "kind": "host",
+      "asn": null,
+      "x": -450,
+      "y": 0,
+      "adapters": 1,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "192.168.4.10/24"
+          ],
+          "description": "to R4"
+        }
+      },
+      "loopback": [],
+      "dummies": {},
+      "gateway": "192.168.4.1"
+    }
+  },
+  "links": [
+    {
+      "a": "R1",
+      "a_iface": "eth0",
+      "b": "R2",
+      "b_iface": "eth0",
+      "subnet": "10.0.12.0/24"
+    },
+    {
+      "a": "R2",
+      "a_iface": "eth1",
+      "b": "R3",
+      "b_iface": "eth0",
+      "subnet": "10.0.23.0/24"
+    },
+    {
+      "a": "R1",
+      "a_iface": "eth1",
+      "b": "R4",
+      "b_iface": "eth0",
+      "subnet": "10.0.14.0/24"
+    },
+    {
+      "a": "R3",
+      "a_iface": "eth1",
+      "b": "H3",
+      "b_iface": "eth0",
+      "subnet": "192.168.3.0/24"
+    },
+    {
+      "a": "R4",
+      "a_iface": "eth1",
+      "b": "H4",
+      "b_iface": "eth0",
+      "subnet": "192.168.4.0/24"
+    }
+  ]
+}

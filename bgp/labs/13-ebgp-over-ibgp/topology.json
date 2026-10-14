@@ -1,0 +1,201 @@
+{
+  "lab": "13-ebgp-over-ibgp",
+  "title": "BGP - Why does the BGP Algorithm Prefer eBGP routes over iBGP routes?",
+  "video": "https://www.youtube.com/watch?v=0ffgcK70MxU",
+  "nodes": {
+    "R1": {
+      "kind": "router",
+      "asn": 100,
+      "x": -100,
+      "y": -80,
+      "adapters": 3,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.12.1/24"
+          ],
+          "description": "to R2"
+        },
+        "eth1": {
+          "addresses": [
+            "10.0.13.1/24"
+          ],
+          "description": "to R3"
+        },
+        "eth2": {
+          "addresses": [
+            "192.168.1.1/24"
+          ],
+          "description": "LAN to H1"
+        }
+      },
+      "loopback": [
+        "1.1.1.1/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "R2": {
+      "kind": "router",
+      "asn": 100,
+      "x": -100,
+      "y": 80,
+      "adapters": 3,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.12.2/24"
+          ],
+          "description": "to R1"
+        },
+        "eth1": {
+          "addresses": [
+            "10.0.23.2/24"
+          ],
+          "description": "to R3"
+        },
+        "eth2": {
+          "addresses": [
+            "192.168.2.1/24"
+          ],
+          "description": "LAN to H2"
+        }
+      },
+      "loopback": [
+        "2.2.2.2/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "R3": {
+      "kind": "router",
+      "asn": 200,
+      "x": 200,
+      "y": 0,
+      "adapters": 3,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.13.3/24"
+          ],
+          "description": "to R1"
+        },
+        "eth1": {
+          "addresses": [
+            "10.0.23.3/24"
+          ],
+          "description": "to R2"
+        },
+        "eth2": {
+          "addresses": [
+            "192.168.3.1/24"
+          ],
+          "description": "LAN to H3"
+        }
+      },
+      "loopback": [
+        "3.3.3.3/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "H1": {
+      "kind": "host",
+      "asn": null,
+      "x": -350,
+      "y": -80,
+      "adapters": 1,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "192.168.1.10/24"
+          ],
+          "description": "to R1"
+        }
+      },
+      "loopback": [],
+      "dummies": {},
+      "gateway": "192.168.1.1"
+    },
+    "H2": {
+      "kind": "host",
+      "asn": null,
+      "x": -350,
+      "y": 80,
+      "adapters": 1,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "192.168.2.10/24"
+          ],
+          "description": "to R2"
+        }
+      },
+      "loopback": [],
+      "dummies": {},
+      "gateway": "192.168.2.1"
+    },
+    "H3": {
+      "kind": "host",
+      "asn": null,
+      "x": 450,
+      "y": 0,
+      "adapters": 1,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "192.168.3.10/24"
+          ],
+          "description": "to R3"
+        }
+      },
+      "loopback": [],
+      "dummies": {},
+      "gateway": "192.168.3.1"
+    }
+  },
+  "links": [
+    {
+      "a": "R1",
+      "a_iface": "eth0",
+      "b": "R2",
+      "b_iface": "eth0",
+      "subnet": "10.0.12.0/24"
+    },
+    {
+      "a": "R1",
+      "a_iface": "eth1",
+      "b": "R3",
+      "b_iface": "eth0",
+      "subnet": "10.0.13.0/24"
+    },
+    {
+      "a": "R2",
+      "a_iface": "eth1",
+      "b": "R3",
+      "b_iface": "eth1",
+      "subnet": "10.0.23.0/24"
+    },
+    {
+      "a": "R1",
+      "a_iface": "eth2",
+      "b": "H1",
+      "b_iface": "eth0",
+      "subnet": "192.168.1.0/24"
+    },
+    {
+      "a": "R2",
+      "a_iface": "eth2",
+      "b": "H2",
+      "b_iface": "eth0",
+      "subnet": "192.168.2.0/24"
+    },
+    {
+      "a": "R3",
+      "a_iface": "eth2",
+      "b": "H3",
+      "b_iface": "eth0",
+      "subnet": "192.168.3.0/24"
+    }
+  ]
+}

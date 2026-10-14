@@ -1,0 +1,269 @@
+{
+  "lab": "30-capstone-multihomed-enterprise",
+  "title": "Understanding and Mastering BGP - Complete BGP Course (capstone)",
+  "video": "https://www.youtube.com/watch?v=DIDex6WrX2E",
+  "nodes": {
+    "R1": {
+      "kind": "router",
+      "asn": 100,
+      "x": -250,
+      "y": -100,
+      "adapters": 3,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.12.1/24"
+          ],
+          "description": "to R2"
+        },
+        "eth1": {
+          "addresses": [
+            "10.0.13.1/24"
+          ],
+          "description": "to R3"
+        },
+        "eth2": {
+          "addresses": [
+            "192.168.1.1/24"
+          ],
+          "description": "LAN to H1"
+        }
+      },
+      "loopback": [
+        "1.1.1.1/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "R2": {
+      "kind": "router",
+      "asn": 100,
+      "x": -250,
+      "y": 100,
+      "adapters": 2,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.12.2/24"
+          ],
+          "description": "to R1"
+        },
+        "eth1": {
+          "addresses": [
+            "10.0.25.2/24"
+          ],
+          "description": "to R5"
+        }
+      },
+      "loopback": [
+        "2.2.2.2/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "R3": {
+      "kind": "router",
+      "asn": 200,
+      "x": 0,
+      "y": -100,
+      "adapters": 2,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.13.3/24"
+          ],
+          "description": "to R1"
+        },
+        "eth1": {
+          "addresses": [
+            "10.0.34.3/24"
+          ],
+          "description": "to R4"
+        }
+      },
+      "loopback": [
+        "3.3.3.3/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "R4": {
+      "kind": "router",
+      "asn": 200,
+      "x": 200,
+      "y": -100,
+      "adapters": 2,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.34.4/24"
+          ],
+          "description": "to R3"
+        },
+        "eth1": {
+          "addresses": [
+            "10.0.46.4/24"
+          ],
+          "description": "to R6"
+        }
+      },
+      "loopback": [
+        "4.4.4.4/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "R5": {
+      "kind": "router",
+      "asn": 300,
+      "x": 0,
+      "y": 100,
+      "adapters": 2,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.25.5/24"
+          ],
+          "description": "to R2"
+        },
+        "eth1": {
+          "addresses": [
+            "10.0.56.5/24"
+          ],
+          "description": "to R6"
+        }
+      },
+      "loopback": [
+        "5.5.5.5/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "R6": {
+      "kind": "router",
+      "asn": 400,
+      "x": 400,
+      "y": 0,
+      "adapters": 3,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "10.0.46.6/24"
+          ],
+          "description": "to R4"
+        },
+        "eth1": {
+          "addresses": [
+            "10.0.56.6/24"
+          ],
+          "description": "to R5"
+        },
+        "eth2": {
+          "addresses": [
+            "192.168.6.1/24"
+          ],
+          "description": "LAN to H6"
+        }
+      },
+      "loopback": [
+        "6.6.6.6/32"
+      ],
+      "dummies": {},
+      "gateway": null
+    },
+    "H1": {
+      "kind": "host",
+      "asn": null,
+      "x": -500,
+      "y": -100,
+      "adapters": 1,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "192.168.1.10/24"
+          ],
+          "description": "to R1"
+        }
+      },
+      "loopback": [],
+      "dummies": {},
+      "gateway": "192.168.1.1"
+    },
+    "H6": {
+      "kind": "host",
+      "asn": null,
+      "x": 650,
+      "y": 0,
+      "adapters": 1,
+      "interfaces": {
+        "eth0": {
+          "addresses": [
+            "192.168.6.10/24"
+          ],
+          "description": "to R6"
+        }
+      },
+      "loopback": [],
+      "dummies": {},
+      "gateway": "192.168.6.1"
+    }
+  },
+  "links": [
+    {
+      "a": "R1",
+      "a_iface": "eth0",
+      "b": "R2",
+      "b_iface": "eth0",
+      "subnet": "10.0.12.0/24"
+    },
+    {
+      "a": "R1",
+      "a_iface": "eth1",
+      "b": "R3",
+      "b_iface": "eth0",
+      "subnet": "10.0.13.0/24"
+    },
+    {
+      "a": "R2",
+      "a_iface": "eth1",
+      "b": "R5",
+      "b_iface": "eth0",
+      "subnet": "10.0.25.0/24"
+    },
+    {
+      "a": "R3",
+      "a_iface": "eth1",
+      "b": "R4",
+      "b_iface": "eth0",
+      "subnet": "10.0.34.0/24"
+    },
+    {
+      "a": "R4",
+      "a_iface": "eth1",
+      "b": "R6",
+      "b_iface": "eth0",
+      "subnet": "10.0.46.0/24"
+    },
+    {
+      "a": "R5",
+      "a_iface": "eth1",
+      "b": "R6",
+      "b_iface": "eth1",
+      "subnet": "10.0.56.0/24"
+    },
+    {
+      "a": "R1",
+      "a_iface": "eth2",
+      "b": "H1",
+      "b_iface": "eth0",
+      "subnet": "192.168.1.0/24"
+    },
+    {
+      "a": "R6",
+      "a_iface": "eth2",
+      "b": "H6",
+      "b_iface": "eth0",
+      "subnet": "192.168.6.0/24"
+    }
+  ]
+}
