@@ -1,0 +1,150 @@
+{
+ "lab": "26-bgp-path-hunting",
+ "title": "BGP Path Hunting / Path Exploration in Data Center. BGP MRAI",
+ "project": "evpn-26-bgp-path-hunting",
+ "video": "https://www.youtube.com/watch?v=CA4kklcCeHk",
+ "variants": {
+  "unique-asn-mrai0": "unique ASN on every switch, MRAI 0 (FRR datacenter default)",
+  "unique-asn-mrai5": "unique ASN, MRAI 5 s",
+  "same-asn-spines": "spines share AS 65100, MRAI 0"
+ },
+ "default_variant": "unique-asn-mrai0",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -240,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "leaf4",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 240,
+   "y": 40
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth3",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth4",
+   "leaf4",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth3",
+   "leaf3",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth4",
+   "leaf4",
+   "eth12"
+  ]
+ ],
+ "checks": {
+  "unique-asn-mrai0": [
+   {
+    "node": "leaf4",
+    "cmd": "vtysh -c 'show ip bgp 10.255.255.1/32'",
+    "expect": "65001",
+    "desc": ""
+   },
+   {
+    "node": "spine2",
+    "cmd": "vtysh -c 'show ip bgp 10.255.255.1/32'",
+    "expect": "6500[234] 65101 65001|6500[234] 65102 65001",
+    "desc": ""
+   }
+  ],
+  "unique-asn-mrai5": [
+   {
+    "node": "leaf4",
+    "cmd": "vtysh -c 'show ip bgp 10.255.255.1/32'",
+    "expect": "65001",
+    "desc": ""
+   }
+  ],
+  "same-asn-spines": [
+   {
+    "node": "leaf4",
+    "cmd": "vtysh -c 'show ip bgp 10.255.255.1/32'",
+    "expect": "65001",
+    "desc": ""
+   }
+  ]
+ }
+}

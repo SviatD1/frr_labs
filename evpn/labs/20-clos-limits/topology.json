@@ -1,0 +1,171 @@
+{
+ "lab": "20-clos-limits",
+ "title": "Calculating Clos Fabric Limits for Data Center Networks",
+ "project": "evpn-20-clos-limits",
+ "video": "https://www.youtube.com/watch?v=j7mGuIrsU1k",
+ "variants": {
+  "default": "3 leaves, 2 spines, incast towards host1"
+ },
+ "default_variant": "default",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -160,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 0,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 160,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -240,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  },
+  {
+   "name": "host4",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 240,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth3",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth3",
+   "leaf3",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth2",
+   "host3",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth1",
+   "host4",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "default": [
+   {
+    "node": "host2",
+    "cmd": "ping -c 3 -W 1 10.10.10.10",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "clos-calc --radix 64 --port 100 --server-port 25 --oversub 3",
+    "expect": "oversubscription 3\\.\\d+:1|oversubscription 2\\.\\d+:1",
+    "desc": ""
+   }
+  ]
+ }
+}

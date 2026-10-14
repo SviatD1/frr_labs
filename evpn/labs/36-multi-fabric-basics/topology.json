@@ -1,0 +1,222 @@
+{
+ "lab": "36-multi-fabric-basics",
+ "title": "Interconnecting multiple EVPN fabrics. Multi Domain, Inter Domain, Multi Pod, Multi Site.",
+ "project": "evpn-36-multi-fabric-basics",
+ "video": "https://www.youtube.com/watch?v=JMBQiF4DbNA",
+ "variants": {
+  "connected": "loopbacks via network/redistribute + EVPN next-hop unchanged"
+ },
+ "default_variant": "connected",
+ "nodes": [
+  {
+   "name": "spine111",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "leaf101",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -240,
+   "y": 40
+  },
+  {
+   "name": "leaf102",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "spine211",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf201",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "leaf202",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 240,
+   "y": 40
+  },
+  {
+   "name": "host11",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -400,
+   "y": 210
+  },
+  {
+   "name": "host12",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -240,
+   "y": 210
+  },
+  {
+   "name": "host13",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host24",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  },
+  {
+   "name": "host25",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 240,
+   "y": 210
+  },
+  {
+   "name": "host26",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 400,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine111",
+   "eth1",
+   "leaf101",
+   "eth11"
+  ],
+  [
+   "spine111",
+   "eth2",
+   "leaf102",
+   "eth11"
+  ],
+  [
+   "spine211",
+   "eth1",
+   "leaf201",
+   "eth11"
+  ],
+  [
+   "spine211",
+   "eth2",
+   "leaf202",
+   "eth11"
+  ],
+  [
+   "spine111",
+   "eth10",
+   "spine211",
+   "eth10"
+  ],
+  [
+   "leaf101",
+   "eth1",
+   "host11",
+   "eth1"
+  ],
+  [
+   "leaf102",
+   "eth1",
+   "host12",
+   "eth1"
+  ],
+  [
+   "leaf102",
+   "eth2",
+   "host13",
+   "eth1"
+  ],
+  [
+   "leaf201",
+   "eth1",
+   "host24",
+   "eth1"
+  ],
+  [
+   "leaf202",
+   "eth1",
+   "host25",
+   "eth1"
+  ],
+  [
+   "leaf202",
+   "eth2",
+   "host26",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "connected": [
+   {
+    "node": "spine111",
+    "cmd": "vtysh -c 'show ip bgp'",
+    "expect": "201\\.201\\.201\\.201/32",
+    "desc": ""
+   },
+   {
+    "node": "leaf101",
+    "cmd": "ip route show 201.201.201.201",
+    "expect": "201\\.201\\.201\\.201",
+    "desc": ""
+   },
+   {
+    "node": "host11",
+    "cmd": "ping -c 3 -W 1 10.10.10.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host13",
+    "cmd": "ping -c 3 -W 1 10.220.220.60",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf101",
+    "cmd": "bridge fdb show dev vxlan10010",
+    "expect": "dst 201\\.201\\.201\\.201",
+    "desc": ""
+   }
+  ]
+ }
+}

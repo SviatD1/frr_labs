@@ -1,0 +1,234 @@
+{
+ "lab": "25-ebgp-underlay",
+ "title": "eBGP as Underlay for EVPN in Data Center",
+ "project": "evpn-25-ebgp-underlay",
+ "video": "https://www.youtube.com/watch?v=ty5JxLFjtJQ",
+ "variants": {
+  "same-asn-spines": "spines AS 65100, leaves 65001-65003, numbered links",
+  "unique-asn": "every switch its own AS (transit leaf possible)",
+  "unnumbered": "same as same-asn-spines but BGP unnumbered (IPv6 LLA, RFC 5549)"
+ },
+ "default_variant": "same-asn-spines",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -160,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 0,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 160,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -160,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 0,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 160,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth3",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth3",
+   "leaf3",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth1",
+   "host3",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "same-asn-spines": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 3.3.3.3",
+    "expect": "nexthop via[\\s\\S]*nexthop via",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show bgp l2vpn evpn route type macip'",
+    "expect": "00:cc:cc:cc:cc:cc",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "bridge fdb show dev vxlan10010",
+    "expect": "dst 3\\.3\\.3\\.3",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show ip bgp 3.3.3.3/32'",
+    "expect": "65100 65003",
+    "desc": ""
+   }
+  ],
+  "unique-asn": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 3.3.3.3",
+    "expect": "nexthop via[\\s\\S]*nexthop via",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show bgp l2vpn evpn route type macip'",
+    "expect": "00:cc:cc:cc:cc:cc",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "bridge fdb show dev vxlan10010",
+    "expect": "dst 3\\.3\\.3\\.3",
+    "desc": ""
+   }
+  ],
+  "unnumbered": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 3.3.3.3",
+    "expect": "nexthop via[\\s\\S]*nexthop via",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show bgp l2vpn evpn route type macip'",
+    "expect": "00:cc:cc:cc:cc:cc",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "bridge fdb show dev vxlan10010",
+    "expect": "dst 3\\.3\\.3\\.3",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 3.3.3.3",
+    "expect": "via inet6 fe80::",
+    "desc": ""
+   }
+  ]
+ }
+}

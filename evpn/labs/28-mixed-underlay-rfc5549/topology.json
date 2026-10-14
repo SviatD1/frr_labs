@@ -1,0 +1,141 @@
+{
+ "lab": "28-mixed-underlay-rfc5549",
+ "title": "Mixed IPv4+IPv6 Underlay for EVPN. RFCs 5549 and 8950",
+ "project": "evpn-28-mixed-underlay-rfc5549",
+ "video": "https://www.youtube.com/watch?v=M__PhG_GMx8",
+ "variants": {
+  "v4-over-v6": "IPv4 NLRI with IPv6 next hops (extended next hop), IPv4 VTEPs",
+  "ipv6-core": "IPv6 loopbacks + IPv6 VTEPs, EVPN over IPv6 sessions (FRR >= 10.6)"
+ },
+ "default_variant": "v4-over-v6",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "v4-over-v6": [
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 2.2.2.2",
+    "expect": "via inet6 fe80::",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show ip bgp 2.2.2.2/32'",
+    "expect": "fe80::",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.20",
+    "expect": " 0% packet loss",
+    "desc": ""
+   }
+  ],
+  "ipv6-core": [
+   {
+    "node": "leaf1",
+    "cmd": "ip -6 route show fc00::2",
+    "expect": "via fe80::",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.20",
+    "expect": " 0% packet loss",
+    "desc": ""
+   }
+  ]
+ }
+}

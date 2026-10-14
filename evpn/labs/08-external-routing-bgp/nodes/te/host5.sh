@@ -1,0 +1,76 @@
+#!/bin/bash
+# =====================================================================
+# EVPN lab 08 - External Routing in EVPN using BGP
+# node: host5   role: exthost   variant: te
+# Generated file. Apply on the VM as root:   bash host5.sh
+# (tools/gns3_lab.py push ... does this for you over the console)
+# =====================================================================
+set -e
+install -d /etc/lab
+echo "08-external-routing-bgp/te/host5" > /etc/lab/id
+echo "router" > /etc/lab/kind
+
+# ---------------------------------------------------------------------
+# 1) Linux data plane  ->  /etc/lab/net.sh  (re-run at every boot)
+# ---------------------------------------------------------------------
+cat > /etc/lab/net.sh <<'__LAB_NET__'
+#!/bin/bash
+# Linux networking for host5 (lab 08, variant te)
+lab-reset          # remove everything a previous lab created
+set -x
+
+# --- loopback (router-id / VTEP source) ---
+ip addr add 10.100.100.100/32 dev lo
+ip link set eth1 up
+ip addr add 172.16.15.5/24 dev eth1
+ip link set eth2 up
+ip addr add 172.16.25.5/24 dev eth2
+__LAB_NET__
+chmod +x /etc/lab/net.sh
+
+# ---------------------------------------------------------------------
+# 2) FRR control plane  ->  /etc/frr/frr.conf
+# ---------------------------------------------------------------------
+cat > /etc/frr/frr.conf <<'__LAB_FRR__'
+frr defaults datacenter
+hostname host5
+log syslog informational
+service integrated-vtysh-config
+!
+interface eth1
+ ip ospf area 0
+ ip ospf network point-to-point
+exit
+!
+interface eth2
+ ip ospf area 0
+ ip ospf network point-to-point
+exit
+!
+interface lo
+ ip ospf area 0
+ ip ospf passive
+exit
+!
+router ospf
+ ospf router-id 10.100.100.100
+exit
+!
+router bgp 65001
+ bgp router-id 10.100.100.100
+ neighbor 172.16.15.1 remote-as 65001
+ neighbor 172.16.25.2 remote-as 65001
+ !
+ address-family ipv4 unicast
+  network 10.100.100.100/32
+  maximum-paths ibgp 4
+ exit-address-family
+exit
+!
+end
+__LAB_FRR__
+
+# ---------------------------------------------------------------------
+# 3) apply: hostname, run net.sh, (re)start or stop FRR
+# ---------------------------------------------------------------------
+lab-apply host5

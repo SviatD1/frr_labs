@@ -1,0 +1,16 @@
+[Unit]
+Description=EVPN lab: Linux network configuration (/etc/lab/net.sh)
+DefaultDependencies=no
+After=systemd-udevd.service systemd-sysctl.service network-pre.target
+Before=network.target frr.service
+ConditionPathExists=/etc/lab/net.sh
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash /etc/lab/net.sh
+StandardOutput=append:/var/log/lab-net.log
+StandardError=append:/var/log/lab-net.log
+
+[Install]
+WantedBy=multi-user.target

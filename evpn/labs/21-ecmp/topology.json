@@ -1,0 +1,201 @@
+{
+ "lab": "21-ecmp",
+ "title": "Why ECMP Algorithm is Critical in Data Center Networks",
+ "project": "evpn-21-ecmp",
+ "video": "https://www.youtube.com/watch?v=LKp1RzZRMDg",
+ "variants": {
+  "l3-hash": "fib_multipath_hash_policy=0 (src/dst IP only)",
+  "l4-hash": "fib_multipath_hash_policy=1 (5-tuple)"
+ },
+ "default_variant": "l4-hash",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -240,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine3",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "spine4",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 240,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 15,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 15,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine3",
+   "eth1",
+   "leaf1",
+   "eth13"
+  ],
+  [
+   "spine3",
+   "eth2",
+   "leaf2",
+   "eth13"
+  ],
+  [
+   "spine4",
+   "eth1",
+   "leaf1",
+   "eth14"
+  ],
+  [
+   "spine4",
+   "eth2",
+   "leaf2",
+   "eth14"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "l3-hash": [
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 10.20.20.0/24",
+    "expect": "(nexthop via[\\s\\S]*){4}",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "sysctl net.ipv4.fib_multipath_hash_policy",
+    "expect": "= 0",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.20.20",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ecmp-test 10.20.20.20 10.10.10.10 64 | wc -l",
+    "expect": "^\\s*1\\s*$",
+    "desc": ""
+   }
+  ],
+  "l4-hash": [
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 10.20.20.0/24",
+    "expect": "(nexthop via[\\s\\S]*){4}",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "sysctl net.ipv4.fib_multipath_hash_policy",
+    "expect": "= 1",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.20.20",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ecmp-test 10.20.20.20 10.10.10.10 64 | wc -l",
+    "expect": "^\\s*4\\s*$",
+    "desc": ""
+   }
+  ]
+ }
+}

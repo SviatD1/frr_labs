@@ -1,0 +1,189 @@
+{
+ "lab": "34-ipv6-endpoints",
+ "title": "IPv6 Endpoints in EVPN",
+ "project": "evpn-34-ipv6-endpoints",
+ "video": "https://www.youtube.com/watch?v=miq6tTILvlU",
+ "variants": {
+  "static": "static IPv6 addresses on hosts, RAs suppressed",
+  "slaac": "leaves send RAs (prefix + default router), hosts autoconfigure (EUI-64)"
+ },
+ "default_variant": "static",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -160,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 0,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 160,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -160,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 0,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 160,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth3",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth3",
+   "leaf3",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth1",
+   "host3",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "static": [
+   {
+    "node": "host1",
+    "cmd": "ping -6 -c 3 -W 1 fd00:10::20",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -6 -c 3 -W 1 fd00:20::30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.20.30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show evpn arp-cache vni 10010'",
+    "expect": "fd00:10::20\\s+remote",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip -6 route show vrf A fd00:20::30",
+    "expect": "via ::ffff:3\\.3\\.3\\.3|via 3\\.3\\.3\\.3|vlan4001",
+    "desc": ""
+   }
+  ],
+  "slaac": [
+   {
+    "node": "host1",
+    "cmd": "ip -6 addr show dev eth1",
+    "expect": "fd00:10::2aa:aaff:feaa:aaaa",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -6 -c 3 -W 1 fd00:20::2cc:ccff:fecc:cccc",
+    "expect": " 0% packet loss",
+    "desc": ""
+   }
+  ]
+ }
+}

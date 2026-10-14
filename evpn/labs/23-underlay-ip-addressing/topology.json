@@ -1,0 +1,165 @@
+{
+ "lab": "23-underlay-ip-addressing",
+ "title": "Designing Underlay IP Connectivity for Data Center Networks",
+ "project": "evpn-23-underlay-ip-addressing",
+ "video": "https://www.youtube.com/watch?v=wvRWIa6GK4s",
+ "variants": {
+  "ipv4-numbered": "classic /24 (or /31) per link",
+  "ipv4-unnumbered": "links carry the loopback /32 with a peer address",
+  "ipv6-numbered": "/64 per link, IPv6 loopbacks, IPv6 VTEPs (FRR >= 10.6)",
+  "ipv6-lla": "link-local only, IPv6 loopbacks, IPv6 VTEPs (FRR >= 10.6)"
+ },
+ "default_variant": "ipv4-numbered",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "ipv4-numbered": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.20",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 2.2.2.2",
+    "expect": "nexthop via 10\\.1\\.11\\.11",
+    "desc": ""
+   }
+  ],
+  "ipv4-unnumbered": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.20",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 2.2.2.2",
+    "expect": "nexthop via 11\\.11\\.11\\.11 dev eth11",
+    "desc": ""
+   }
+  ],
+  "ipv6-numbered": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.20",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip -6 route show fc00::2",
+    "expect": "via fc00:10:1:11::11",
+    "desc": ""
+   }
+  ],
+  "ipv6-lla": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.20",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip -6 route show fc00::2",
+    "expect": "via fe80::",
+    "desc": ""
+   }
+  ]
+ }
+}

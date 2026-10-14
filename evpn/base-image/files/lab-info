@@ -1,0 +1,9 @@
+#!/bin/bash
+# lab-info: one-screen summary of this node
+echo "== $(hostname): $(cat /etc/lab/id 2>/dev/null || echo 'no lab applied')"
+ip -br link | grep -v '^lo' ; echo; ip -br addr | grep -v '^lo ' ; echo
+ip route | head -20
+if systemctl is-active -q frr; then
+  echo; vtysh -c 'show bgp summary' 2>/dev/null | grep -vE '^$' | head -30
+  vtysh -c 'show evpn vni' 2>/dev/null | head -20
+fi

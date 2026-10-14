@@ -1,0 +1,210 @@
+{
+ "lab": "35-multivendor-frr",
+ "title": "Multi-vendor EVPN design using Arista and FRR",
+ "project": "evpn-35-multivendor-frr",
+ "video": "https://www.youtube.com/watch?v=576MaUMsmig",
+ "variants": {
+  "unnumbered-isis-ibgp": "IPv4 unnumbered links, IS-IS, iBGP EVPN with RR on spines",
+  "ipv6-lla-isis-ibgp": "IPv6 link-local links, IS-IS IPv6, iBGP over IPv6 loopbacks, IPv6 VTEPs (FRR >= 10.6)",
+  "rfc5549-ibgp": "no IGP: iBGP unnumbered (interface) sessions, spines RR + next-hop-self for IPv4",
+  "rfc5549-ebgp": "no IGP: eBGP unnumbered, spines AS 65100, leaves AS 65001/65002",
+  "mtu-mismatch": "unnumbered-isis-ibgp with leaf2 eth11 MTU 9000 and spine1 eth2 MTU 1500"
+ },
+ "default_variant": "unnumbered-isis-ibgp",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -240,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  },
+  {
+   "name": "host4",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 240,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf1",
+   "eth2",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host3",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth2",
+   "host4",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "unnumbered-isis-ibgp": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.20.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   }
+  ],
+  "ipv6-lla-isis-ibgp": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.20.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   }
+  ],
+  "rfc5549-ibgp": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.20.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   }
+  ],
+  "rfc5549-ebgp": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.20.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   }
+  ],
+  "mtu-mismatch": [
+   {
+    "node": "spine1",
+    "cmd": "vtysh -c 'show isis neighbor'",
+    "expect": "\\seth1\\s+2\\s+Up",
+    "desc": "adjacency to leaf1 is fine"
+   },
+   {
+    "node": "spine1",
+    "cmd": "vtysh -c 'show isis neighbor' | grep -c 'eth2 .*Up'",
+    "expect": "^0",
+    "desc": "no adjacency to leaf2"
+   }
+  ]
+ }
+}

@@ -1,0 +1,237 @@
+{
+ "lab": "29-overlay-asic-limits",
+ "title": "Designing EVPN Overlay for Data Center. ASICs and their limits",
+ "project": "evpn-29-overlay-asic-limits",
+ "video": "https://www.youtube.com/watch?v=jzDw9H-bM_Q",
+ "variants": {
+  "vni-everywhere": "VLAN 10 and 20 configured on all leaves",
+  "vni-where-needed": "leaf1/leaf2 only VLAN 10, leaf3/leaf4 only VLAN 20"
+ },
+ "default_variant": "vni-everywhere",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -240,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "leaf4",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 240,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -240,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  },
+  {
+   "name": "host4",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 240,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth3",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth4",
+   "leaf4",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth3",
+   "leaf3",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth4",
+   "leaf4",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth1",
+   "host3",
+   "eth1"
+  ],
+  [
+   "leaf4",
+   "eth1",
+   "host4",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "vni-everywhere": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.0.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ip -o link show type macvlan | wc -l | grep -q 50 || mac-flood 50 eth1 10.10 >/dev/null; ip -o link show type macvlan | wc -l",
+    "expect": "^50",
+    "desc": ""
+   },
+   {
+    "node": "leaf2",
+    "cmd": "vtysh -c 'show evpn vni 10010'",
+    "expect": "Number of MACs \\(local and remote\\) known for this VNI: (5[0-9]|[6-9][0-9])",
+    "desc": ""
+   },
+   {
+    "node": "leaf3",
+    "cmd": "bridge fdb show dev vxlan10010 | grep -c '^02:'",
+    "expect": "^(4[0-9]|5[0-9])",
+    "desc": ""
+   }
+  ],
+  "vni-where-needed": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.0.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ip -o link show type macvlan | wc -l | grep -q 50 || mac-flood 50 eth1 10.10 >/dev/null; ip -o link show type macvlan | wc -l",
+    "expect": "^50",
+    "desc": ""
+   },
+   {
+    "node": "leaf2",
+    "cmd": "vtysh -c 'show evpn vni 10010'",
+    "expect": "Number of MACs \\(local and remote\\) known for this VNI: (5[0-9]|[6-9][0-9])",
+    "desc": ""
+   },
+   {
+    "node": "leaf3",
+    "cmd": "ip link show vxlan10010",
+    "expect": "does not exist",
+    "desc": ""
+   },
+   {
+    "node": "leaf3",
+    "cmd": "ip route show vrf A | grep -cE '^10\\.10\\.1[0-9]{2}\\.'",
+    "expect": "^(4[0-9]|5[0-9])",
+    "desc": ""
+   }
+  ]
+ }
+}

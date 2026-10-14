@@ -1,0 +1,180 @@
+{
+ "lab": "05-basic-routing-irb",
+ "title": "Basic routing in EVPN: VRFs, Anycast Gateway, Asymmetric and Symmetric IRB",
+ "project": "evpn-05-basic-routing-irb",
+ "video": "https://www.youtube.com/watch?v=AJc1dd6_gBg",
+ "variants": {
+  "asymmetric": "SVIs on every leaf, no L3VNI",
+  "symmetric": "SVIs + L3VNI 1000 (router MAC, type-2 with two labels)"
+ },
+ "default_variant": "symmetric",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 0,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -240,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  },
+  {
+   "name": "host4",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 240,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf1",
+   "eth2",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host3",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth2",
+   "host4",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "asymmetric": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.20.40",
+    "expect": " 0% packet loss",
+    "desc": "routed between VLANs across leaves"
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 2 -W 1 10.10.10.1",
+    "expect": " 0% packet loss",
+    "desc": "anycast gateway"
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip neigh show vrf CUSTOMER_A 10.20.20.40",
+    "expect": "lladdr 00:dd:dd:dd:dd:dd",
+    "desc": ""
+   }
+  ],
+  "symmetric": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.20.40",
+    "expect": " 0% packet loss",
+    "desc": "routed between VLANs across leaves"
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 2 -W 1 10.10.10.1",
+    "expect": " 0% packet loss",
+    "desc": "anycast gateway"
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show evpn vni 1000'",
+    "expect": "Type: L3|L3",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip route show vrf CUSTOMER_A 10.20.20.40",
+    "expect": "via 2\\.2\\.2\\.2 dev vlan4001",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show evpn rmac vni all'",
+    "expect": "2\\.2\\.2\\.2",
+    "desc": ""
+   }
+  ]
+ }
+}

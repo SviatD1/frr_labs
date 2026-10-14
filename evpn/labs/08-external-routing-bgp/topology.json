@@ -1,0 +1,312 @@
+{
+ "lab": "08-external-routing-bgp",
+ "title": "External Routing in EVPN using BGP",
+ "project": "evpn-08-external-routing-bgp",
+ "video": "https://www.youtube.com/watch?v=uuUZyg-tZ20",
+ "variants": {
+  "basic": "eBGP border leaves <-> r1/r2, host routes filtered",
+  "te": "basic + r1 prefers leaf3 for 10.10.10.0/24, r2 prefers leaf4 for 10.20.20.0/24"
+ },
+ "default_variant": "basic",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -240,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "leaf4",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 240,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -400,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -240,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host4",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  },
+  {
+   "name": "r1",
+   "kind": "router",
+   "role": "ext",
+   "adapters": 13,
+   "ram": 512,
+   "x": 240,
+   "y": 210
+  },
+  {
+   "name": "r2",
+   "kind": "router",
+   "role": "ext",
+   "adapters": 13,
+   "ram": 512,
+   "x": 400,
+   "y": 210
+  },
+  {
+   "name": "host5",
+   "kind": "router",
+   "role": "exthost",
+   "adapters": 13,
+   "ram": 512,
+   "x": 0,
+   "y": 380
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth3",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth4",
+   "leaf4",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth3",
+   "leaf3",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth4",
+   "leaf4",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf1",
+   "eth2",
+   "host3",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth2",
+   "host4",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth1",
+   "r1",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth2",
+   "r2",
+   "eth2"
+  ],
+  [
+   "leaf4",
+   "eth1",
+   "r2",
+   "eth1"
+  ],
+  [
+   "leaf4",
+   "eth2",
+   "r1",
+   "eth2"
+  ],
+  [
+   "r1",
+   "eth3",
+   "host5",
+   "eth1"
+  ],
+  [
+   "r2",
+   "eth3",
+   "host5",
+   "eth2"
+  ]
+ ],
+ "checks": {
+  "basic": [
+   {
+    "node": "leaf3",
+    "cmd": "vtysh -c 'show bgp vrf A summary'",
+    "expect": "172\\.16\\.31\\.1\\)?\\s+4\\s+65001\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\S+\\s+\\d+",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.100.100.100",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "r1",
+    "cmd": "vtysh -c 'show ip bgp'",
+    "expect": "10\\.10\\.10\\.0/24",
+    "desc": ""
+   },
+   {
+    "node": "r1",
+    "cmd": "vtysh -c 'show ip bgp 10.10.10.10/32'",
+    "expect": "Network not in table|not in table",
+    "desc": ""
+   }
+  ],
+  "te": [
+   {
+    "node": "leaf3",
+    "cmd": "vtysh -c 'show bgp vrf A summary'",
+    "expect": "172\\.16\\.31\\.1\\)?\\s+4\\s+65001\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\S+\\s+\\d+",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.100.100.100",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "r1",
+    "cmd": "vtysh -c 'show ip bgp'",
+    "expect": "10\\.10\\.10\\.0/24",
+    "desc": ""
+   },
+   {
+    "node": "r1",
+    "cmd": "vtysh -c 'show ip bgp 10.10.10.10/32'",
+    "expect": "Network not in table|not in table",
+    "desc": ""
+   },
+   {
+    "node": "host5",
+    "cmd": "vtysh -c 'show ip bgp 10.10.10.0/24'",
+    "expect": "Local Pref(erence)?:? ?200|localpref 200",
+    "desc": ""
+   },
+   {
+    "node": "host5",
+    "cmd": "ip route get 10.10.10.10",
+    "expect": "via 172\\.16\\.15\\.1",
+    "desc": ""
+   },
+   {
+    "node": "host5",
+    "cmd": "ip route get 10.20.20.40",
+    "expect": "via 172\\.16\\.25\\.2",
+    "desc": ""
+   }
+  ]
+ }
+}

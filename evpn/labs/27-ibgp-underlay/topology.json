@@ -1,0 +1,171 @@
+{
+ "lab": "27-ibgp-underlay",
+ "title": "iBGP as Underlay for EVPN in Data Center",
+ "project": "evpn-27-ibgp-underlay",
+ "video": "https://www.youtube.com/watch?v=jfGXKxvVfMg",
+ "variants": {
+  "ibgp": "iBGP underlay + EVPN, RR on spines",
+  "duplicate-router-id": "leaf2 and leaf3 share router-id 9.9.9.9 - spot the problem"
+ },
+ "default_variant": "ibgp",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -160,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 0,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 160,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -160,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 0,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 160,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth3",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth3",
+   "leaf3",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth1",
+   "host3",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "ibgp": [
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 3.3.3.3",
+    "expect": "nexthop via 10\\.1\\.11\\.11[\\s\\S]*nexthop via 10\\.1\\.12\\.12",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.30",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show bgp l2vpn evpn route type multicast'",
+    "expect": "\\[3\\]:\\[0\\]:\\[32\\]:\\[3\\.3\\.3\\.3\\]",
+    "desc": ""
+   }
+  ],
+  "duplicate-router-id": [
+   {
+    "node": "leaf2",
+    "cmd": "vtysh -c 'show ip bgp 3.3.3.3/32'",
+    "expect": "Network not in table|not in table",
+    "desc": ""
+   }
+  ]
+ }
+}

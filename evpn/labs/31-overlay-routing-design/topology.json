@@ -1,0 +1,267 @@
+{
+ "lab": "31-overlay-routing-design",
+ "title": "EVPN Overlay Design for Routing in Data Center",
+ "project": "evpn-31-overlay-routing-design",
+ "video": "https://www.youtube.com/watch?v=jRbyPlaTZyQ",
+ "variants": {
+  "host-routes": "default symmetric IRB: /32 per endpoint on every leaf",
+  "subnets-only": "leaves strip the L3VNI RT from incoming type-2 -> no remote /32, only type-5 subnets"
+ },
+ "default_variant": "host-routes",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -240,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "leaf4",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 240,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -400,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -240,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host4",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  },
+  {
+   "name": "host5",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 240,
+   "y": 210
+  },
+  {
+   "name": "host6",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 400,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth3",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth4",
+   "leaf4",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth3",
+   "leaf3",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth4",
+   "leaf4",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf1",
+   "eth2",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host3",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth2",
+   "host4",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth1",
+   "host5",
+   "eth1"
+  ],
+  [
+   "leaf4",
+   "eth1",
+   "host6",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "host-routes": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.30.30.50",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.20.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host5",
+    "cmd": "ping -c 3 -W 1 10.40.40.60",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf4",
+    "cmd": "ip route show vrf A",
+    "expect": "10\\.10\\.10\\.10 .*vlan4001",
+    "desc": ""
+   }
+  ],
+  "subnets-only": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.30.30.50",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.20.20.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "host5",
+    "cmd": "ping -c 3 -W 1 10.40.40.60",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf4",
+    "cmd": "ip route show vrf A",
+    "expect": "10\\.10\\.10\\.0/24 .*vlan4001",
+    "desc": ""
+   },
+   {
+    "node": "leaf4",
+    "cmd": "ip route show vrf A 10.10.10.10",
+    "expect": "^$",
+    "desc": ""
+   }
+  ]
+ }
+}

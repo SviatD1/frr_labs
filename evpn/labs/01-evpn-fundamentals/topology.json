@@ -1,0 +1,213 @@
+{
+ "lab": "01-evpn-fundamentals",
+ "title": "EVPN Fundamentals",
+ "project": "evpn-01-evpn-fundamentals",
+ "video": "https://www.youtube.com/watch?v=Dk-qNDrZDX4",
+ "variants": {
+  "default": "STP triangle + routed leaf/spine"
+ },
+ "default_variant": "default",
+ "nodes": [
+  {
+   "name": "sw1",
+   "kind": "router",
+   "role": "switch",
+   "adapters": 13,
+   "ram": 512,
+   "x": -450,
+   "y": -200
+  },
+  {
+   "name": "sw2",
+   "kind": "router",
+   "role": "switch",
+   "adapters": 13,
+   "ram": 512,
+   "x": -550,
+   "y": -30
+  },
+  {
+   "name": "sw3",
+   "kind": "router",
+   "role": "switch",
+   "adapters": 13,
+   "ram": 512,
+   "x": -350,
+   "y": -30
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -550,
+   "y": 140
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -350,
+   "y": 140
+  },
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 150,
+   "y": -200
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 350,
+   "y": -200
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 150,
+   "y": -30
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 350,
+   "y": -30
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 150,
+   "y": 140
+  },
+  {
+   "name": "host4",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 350,
+   "y": 140
+  }
+ ],
+ "links": [
+  [
+   "sw1",
+   "eth1",
+   "sw2",
+   "eth1"
+  ],
+  [
+   "sw1",
+   "eth2",
+   "sw3",
+   "eth1"
+  ],
+  [
+   "sw2",
+   "eth2",
+   "sw3",
+   "eth2"
+  ],
+  [
+   "sw2",
+   "eth3",
+   "host1",
+   "eth1"
+  ],
+  [
+   "sw3",
+   "eth3",
+   "host2",
+   "eth1"
+  ],
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host3",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host4",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "default": [
+   {
+    "node": "sw3",
+    "cmd": "bridge link show dev eth2",
+    "expect": "state blocking",
+    "desc": "sw3<->sw2 is blocked by STP"
+   },
+   {
+    "node": "sw1",
+    "cmd": "bridge link show dev eth1",
+    "expect": "state forwarding",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 192.168.1.2",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 10.2.2.0/24",
+    "expect": "nexthop via 10\\.1\\.11\\.11[\\s\\S]*nexthop via 10\\.1\\.12\\.12",
+    "desc": "two equal-cost paths"
+   },
+   {
+    "node": "host3",
+    "cmd": "ping -c 3 -W 1 10.2.2.10",
+    "expect": " 0% packet loss",
+    "desc": ""
+   }
+  ]
+ }
+}

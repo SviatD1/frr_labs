@@ -1,0 +1,29 @@
+#!/bin/bash
+# lab-reset: bring the VM's networking back to a clean slate before a lab applies its config.
+# Keeps lo and the physical ethN interfaces, deletes everything else a lab may have created.
+nft flush ruleset 2>/dev/null
+pkill -f lab-gw-keepalive 2>/dev/null
+for d in $(ls /sys/class/net); do
+  case "$d" in lo|eth[0-9]|eth[0-9][0-9]) ;; *) ip link del "$d" 2>/dev/null ;; esac
+done
+for d in $(ls /sys/class/net); do
+  case "$d" in
+    eth[0-9]|eth[0-9][0-9])
+      ip link set "$d" nomaster 2>/dev/null
+      ip link set "$d" down
+      ip addr flush dev "$d"
+      ip link set "$d" mtu 1500
+      tc qdisc del dev "$d" root 2>/dev/null
+      perm=$(ethtool -P "$d" 2>/dev/null | awk '{print $3}')
+      [ -n "$perm" ] && [ "$perm" != "00:00:00:00:00:00" ] && ip link set "$d" address "$perm"
+      ;;
+  esac
+done
+ip addr flush dev lo scope global
+ip -6 addr flush dev lo scope global
+ip route flush table main proto static 2>/dev/null
+ip route flush table main proto boot 2>/dev/null
+ip -6 route flush table main proto boot 2>/dev/null
+ip nexthop flush 2>/dev/null
+sysctl -q --system >/dev/null 2>&1
+true

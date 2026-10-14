@@ -1,0 +1,183 @@
+{
+ "lab": "06-routing-deep-dive",
+ "title": "EVPN Routing Deep Dive: Route Types, Isolated VNIs, Inter-VRF Route Leaking",
+ "project": "evpn-06-routing-deep-dive",
+ "video": "https://www.youtube.com/watch?v=Ntm772VEEdE",
+ "variants": {
+  "no-leak": "two VRFs fully isolated",
+  "leak": "leaf3 leaks 10.40.40.0/24 into A and A's subnets into B (import vrf + route-maps)"
+ },
+ "default_variant": "leak",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 0,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -160,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 0,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 160,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -240,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  },
+  {
+   "name": "host4",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 240,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth3",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth1",
+   "host3",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth2",
+   "host4",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "no-leak": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.30.30.30",
+    "expect": " 0% packet loss",
+    "desc": "stretched -> isolated subnet"
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show bgp l2vpn evpn route type prefix'",
+    "expect": "\\[5\\]:\\[0\\]:\\[24\\]:\\[10\\.30\\.30\\.0\\]",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 2 -W 1 10.40.40.40",
+    "expect": "100% packet loss|Unreachable",
+    "desc": ""
+   }
+  ],
+  "leak": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.30.30.30",
+    "expect": " 0% packet loss",
+    "desc": "stretched -> isolated subnet"
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show bgp l2vpn evpn route type prefix'",
+    "expect": "\\[5\\]:\\[0\\]:\\[24\\]:\\[10\\.30\\.30\\.0\\]",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip route show vrf CUSTOMER_A 10.40.40.0/24",
+    "expect": "10\\.40\\.40\\.0/24",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.40.40.40",
+    "expect": " 0% packet loss",
+    "desc": "A -> B via route leaking"
+   },
+   {
+    "node": "host4",
+    "cmd": "ping -c 3 -W 1 10.10.10.20",
+    "expect": " 0% packet loss",
+    "desc": ""
+   }
+  ]
+ }
+}

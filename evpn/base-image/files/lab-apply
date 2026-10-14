@@ -1,0 +1,29 @@
+#!/bin/bash
+# lab-apply NODE: called at the end of every node script (labs/*/nodes/<variant>/<node>.sh)
+node="$1"
+kind=$(cat /etc/lab/kind 2>/dev/null || echo router)
+echo "$node" > /etc/hostname
+hostname "$node"
+sed -i "/^127.0.1.1/d" /etc/hosts; echo "127.0.1.1 $node" >> /etc/hosts
+if [ "$kind" = router ]; then fwd=1; else fwd=0; fi
+cat > /etc/sysctl.d/95-lab-kind.conf <<EOT
+net.ipv4.ip_forward=$fwd
+net.ipv6.conf.all.forwarding=$fwd
+net.ipv6.conf.default.forwarding=$fwd
+EOT
+systemctl stop frr 2>/dev/null
+if bash /etc/lab/net.sh > /var/log/lab-net.log 2>&1; then
+  echo "net.sh OK"
+else
+  echo "WARNING: net.sh reported errors - see /var/log/lab-net.log"; grep -iE "error|cannot|invalid|no such" /var/log/lab-net.log | head -5
+fi
+systemctl enable lab-net.service >/dev/null 2>&1
+if [ "$kind" = router ]; then
+  systemctl enable frr >/dev/null 2>&1
+  systemctl restart frr
+  sleep 2
+  vtysh -c 'show running-config' >/dev/null 2>&1 || echo "WARNING: FRR not answering"
+else
+  systemctl disable --now frr >/dev/null 2>&1
+fi
+echo "LAB-APPLIED $(cat /etc/lab/id 2>/dev/null)"

@@ -1,0 +1,123 @@
+{
+ "lab": "02-basic-bridging",
+ "title": "Basic Bridging/Switching in EVPN",
+ "project": "evpn-02-basic-bridging",
+ "video": "https://www.youtube.com/watch?v=a4Lfu9x3eyY",
+ "variants": {
+  "default": "IS-IS underlay, iBGP EVPN, VLAN10/VNI10010"
+ },
+ "default_variant": "default",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 0,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "default": [
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show ip route isis'",
+    "expect": "2\\.2\\.2\\.2/32",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show bgp neighbor 11.11.11.11'",
+    "expect": "BGP state = Established",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.20",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show evpn mac vni 10010'",
+    "expect": "00:bb:bb:bb:bb:bb\\s+remote\\s+2\\.2\\.2\\.2",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "bridge fdb show dev vxlan10010",
+    "expect": "00:bb:bb:bb:bb:bb.*extern_learn|00:bb:bb:bb:bb:bb dst 2\\.2\\.2\\.2",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show bgp l2vpn evpn route type multicast'",
+    "expect": "\\[3\\]:\\[0\\]:\\[32\\]:\\[2\\.2\\.2\\.2\\]",
+    "desc": ""
+   }
+  ]
+ }
+}

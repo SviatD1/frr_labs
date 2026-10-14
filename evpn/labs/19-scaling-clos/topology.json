@@ -1,0 +1,288 @@
+{
+ "lab": "19-scaling-clos",
+ "title": "Scaling Clos fabrics in Data Center",
+ "project": "evpn-19-scaling-clos",
+ "video": "https://www.youtube.com/watch?v=fmRJkXP-ZZ4",
+ "variants": {
+  "default": "2 pods x (2 spines + 2 leaves) + 2 super-spines, IS-IS + iBGP EVPN (RR on super-spines)"
+ },
+ "default_variant": "default",
+ "nodes": [
+  {
+   "name": "super1",
+   "kind": "router",
+   "role": "super",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -300
+  },
+  {
+   "name": "super2",
+   "kind": "router",
+   "role": "super",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -300
+  },
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -240,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine3",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "spine4",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 240,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -240,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "leaf4",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 240,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -240,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  },
+  {
+   "name": "host4",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 240,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine3",
+   "eth1",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "spine4",
+   "eth1",
+   "leaf3",
+   "eth12"
+  ],
+  [
+   "spine3",
+   "eth2",
+   "leaf4",
+   "eth11"
+  ],
+  [
+   "spine4",
+   "eth2",
+   "leaf4",
+   "eth12"
+  ],
+  [
+   "super1",
+   "eth1",
+   "spine1",
+   "eth10"
+  ],
+  [
+   "super2",
+   "eth1",
+   "spine1",
+   "eth11"
+  ],
+  [
+   "super1",
+   "eth2",
+   "spine2",
+   "eth10"
+  ],
+  [
+   "super2",
+   "eth2",
+   "spine2",
+   "eth11"
+  ],
+  [
+   "super1",
+   "eth3",
+   "spine3",
+   "eth10"
+  ],
+  [
+   "super2",
+   "eth3",
+   "spine3",
+   "eth11"
+  ],
+  [
+   "super1",
+   "eth4",
+   "spine4",
+   "eth10"
+  ],
+  [
+   "super2",
+   "eth4",
+   "spine4",
+   "eth11"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth1",
+   "host3",
+   "eth1"
+  ],
+  [
+   "leaf4",
+   "eth1",
+   "host4",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "default": [
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 3.3.3.3",
+    "expect": "nexthop via 10\\.1\\.11\\.11[\\s\\S]*nexthop via 10\\.1\\.12\\.12",
+    "desc": ""
+   },
+   {
+    "node": "spine1",
+    "cmd": "ip route show 3.3.3.3",
+    "expect": "nexthop via 10\\.21\\.1\\.21[\\s\\S]*nexthop via 10\\.22\\.1\\.22",
+    "desc": ""
+   },
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show bgp l2vpn evpn summary'",
+    "expect": "21\\.21\\.21\\.21\\)?\\s+4\\s+65000[\\s\\S]*22\\.22\\.22\\.22\\)?\\s+4\\s+65000",
+    "desc": ""
+   }
+  ]
+ }
+}

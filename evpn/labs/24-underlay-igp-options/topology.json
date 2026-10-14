@@ -1,0 +1,228 @@
+{
+ "lab": "24-underlay-igp-options",
+ "title": "Routing Protocol Options for EVPN Underlay",
+ "project": "evpn-24-underlay-igp-options",
+ "video": "https://www.youtube.com/watch?v=JsiWm88AKLA",
+ "variants": {
+  "ospfv2": "OSPFv2 point-to-point, area 0",
+  "ospfv3": "OSPFv3 over an IPv6 underlay, IPv6 VTEPs (FRR >= 10.6)",
+  "isis": "IS-IS level-2, point-to-point"
+ },
+ "default_variant": "ospfv2",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -240,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "leaf4",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 240,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -240,
+   "y": 210
+  },
+  {
+   "name": "host2",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -80,
+   "y": 210
+  },
+  {
+   "name": "host3",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 80,
+   "y": 210
+  },
+  {
+   "name": "host4",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 240,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth3",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth4",
+   "leaf4",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth3",
+   "leaf3",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth4",
+   "leaf4",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host2",
+   "eth1"
+  ],
+  [
+   "leaf3",
+   "eth1",
+   "host3",
+   "eth1"
+  ],
+  [
+   "leaf4",
+   "eth1",
+   "host4",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "ospfv2": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show ip ospf neighbor'",
+    "expect": "11\\.11\\.11\\.11\\s+\\d+\\s+Full",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 4.4.4.4",
+    "expect": "nexthop via 10\\.1\\.11\\.11[\\s\\S]*nexthop via 10\\.1\\.12\\.12",
+    "desc": ""
+   }
+  ],
+  "ospfv3": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "vtysh -c 'show ipv6 ospf6 neighbor'",
+    "expect": "11\\.11\\.11\\.11.*Full",
+    "desc": ""
+   }
+  ],
+  "isis": [
+   {
+    "node": "host1",
+    "cmd": "ping -c 3 -W 1 10.10.10.40",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf1",
+    "cmd": "ip route show 4.4.4.4",
+    "expect": "nexthop via 10\\.1\\.11\\.11[\\s\\S]*nexthop via 10\\.1\\.12\\.12",
+    "desc": ""
+   }
+  ]
+ }
+}

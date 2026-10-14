@@ -1,0 +1,204 @@
+{
+ "lab": "13-multihoming-ad-routes",
+ "title": "EVPN Multihoming. Auto Discovery Routes. Fast Convergence. Aliasing.",
+ "project": "evpn-13-multihoming-ad-routes",
+ "video": "https://www.youtube.com/watch?v=Q-oBiCV_EO0",
+ "variants": {
+  "lacp": "all-active ES, LACP bond on host1",
+  "host-active-backup": "same ES config, but host1 uses an active-backup bond (no LACP)"
+ },
+ "default_variant": "lacp",
+ "nodes": [
+  {
+   "name": "spine1",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": -130
+  },
+  {
+   "name": "spine2",
+   "kind": "router",
+   "role": "spine",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": -130
+  },
+  {
+   "name": "leaf1",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -240,
+   "y": 40
+  },
+  {
+   "name": "leaf2",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": -80,
+   "y": 40
+  },
+  {
+   "name": "leaf3",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 80,
+   "y": 40
+  },
+  {
+   "name": "leaf4",
+   "kind": "router",
+   "role": "leaf",
+   "adapters": 13,
+   "ram": 512,
+   "x": 240,
+   "y": 40
+  },
+  {
+   "name": "host1",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": -160,
+   "y": 210
+  },
+  {
+   "name": "host5",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 0,
+   "y": 210
+  },
+  {
+   "name": "host6",
+   "kind": "host",
+   "role": "host",
+   "adapters": 3,
+   "ram": 256,
+   "x": 160,
+   "y": 210
+  }
+ ],
+ "links": [
+  [
+   "spine1",
+   "eth1",
+   "leaf1",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth2",
+   "leaf2",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth3",
+   "leaf3",
+   "eth11"
+  ],
+  [
+   "spine1",
+   "eth4",
+   "leaf4",
+   "eth11"
+  ],
+  [
+   "spine2",
+   "eth1",
+   "leaf1",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth2",
+   "leaf2",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth3",
+   "leaf3",
+   "eth12"
+  ],
+  [
+   "spine2",
+   "eth4",
+   "leaf4",
+   "eth12"
+  ],
+  [
+   "leaf1",
+   "eth1",
+   "host1",
+   "eth1"
+  ],
+  [
+   "leaf2",
+   "eth1",
+   "host1",
+   "eth2"
+  ],
+  [
+   "leaf3",
+   "eth1",
+   "host5",
+   "eth1"
+  ],
+  [
+   "leaf4",
+   "eth1",
+   "host6",
+   "eth1"
+  ]
+ ],
+ "checks": {
+  "lacp": [
+   {
+    "node": "host5",
+    "cmd": "ping -c 3 -W 1 10.10.10.10",
+    "expect": " 0% packet loss",
+    "desc": ""
+   },
+   {
+    "node": "leaf3",
+    "cmd": "vtysh -c 'show bgp l2vpn evpn route type ead'",
+    "expect": "\\[1\\]:\\[0\\]:\\[03:44:38:39:ff:ff:01:00:00:01\\]:\\[128\\]:\\[0\\.0\\.0\\.0\\]|\\[1\\]:\\[4294967295\\]",
+    "desc": ""
+   },
+   {
+    "node": "leaf3",
+    "cmd": "bridge fdb show dev vxlan10010",
+    "expect": "00:aa:aa:aa:aa:aa .*nhid \\d+",
+    "desc": ""
+   },
+   {
+    "node": "leaf3",
+    "cmd": "ip nexthop show",
+    "expect": "group \\d+/\\d+",
+    "desc": ""
+   }
+  ],
+  "host-active-backup": [
+   {
+    "node": "host5",
+    "cmd": "ping -c 3 -W 1 10.10.10.10",
+    "expect": " 0% packet loss",
+    "desc": ""
+   }
+  ]
+ }
+}
